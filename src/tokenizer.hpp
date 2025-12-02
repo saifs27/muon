@@ -5,38 +5,40 @@
 #include <ranges>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
+#include <memory>
+#include <json.hpp>
 
 struct Token {
-    std::string_view str;
+    char str;
     int id;
 };
 
-struct TokenTrie {};
+struct TrieNode {
+    std::unordered_map<Token, TrieNode> children;
+    bool terminal = false;
+};
 
-template <size_t vocab_size>
+struct Trie {
+    std::unique_ptr<TrieNode> root;
+
+
+
+};
+
 struct Tokenizer {
-    std::array<std::string, vocab_size> vocab;
-    int bos_token = -1;
-    int eos_id = -1;
-    int eot_token = -1;
+    std::vector<std::string> vocab;
+    int vocab_size;
+    int BOS = -1;
+    int EOS = -1;
+    int EOT = -1;
     int byte_fallbacks = -1;
-    // std::vector<int> encode(const std::string_view& text);
 
-    std::string decode(const std::vector<int>& tokens) {
-        std::string res;
-        int string_size = std::accumulate(tokens.cbegin(), tokens.cend(), 0,
-                                          [&](int sum, int idx) {
-                                              sum += vocab[idx].size();
-                                              return sum;
-                                          });
+    Tokenizer(int vocab_size);
 
-        res.reserve(string_size);
+    std::vector<int> encode(const std::string_view& text) const;
+    std::string decode(const std::vector<int>& tokens) const;
+    void from_file(char * file);
 
-        for (int idx : tokens) {
-            res += vocab[idx];
-        }
-
-        return res;
-    };
 };

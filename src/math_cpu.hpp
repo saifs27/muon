@@ -2,6 +2,7 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
+#include <vector>
 
 #include "tensor.hpp"
 
@@ -11,17 +12,19 @@ struct Shape {
     int z = 0;
 };
 
-template <size_t M, size_t N, size_t K>
-void matmul(std::array<float, M * N>& result, std::array<float, M * K> A,
-            std::array<float, K * N> B);
+template <typename dtype>
+void matmul(Tensor<dtype>& result, Tensor<dtype> A, Tensor<dtype> B);
+
+
+void softmax(Tensor<float> x);
+
+template <typename dtype>
+Tensor<dtype> linear(Tensor<dtype> x, Tensor<dtype> w, float b);
 
 template <size_t n>
-void softmax(std::array<float, n> x);
-
-template <size_t n>
-void rms_norm(std::array<float, n> input);
+void rms_norm(Tensor<float> input);
 void layer_norm();
 void rope();
-void attn();
+void attention();
 
 void block();

@@ -5,4 +5,6 @@ if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   target_link_libraries(lie PRIVATE stdc++exp)
 endif()
 
+target_link_libraries(lie PRIVATE nlohmann_json)
+
 target_include_directories(lie PRIVATE src)
