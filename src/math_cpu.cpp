@@ -1,5 +1,8 @@
 #include "math_cpu.hpp"
 
+#include <cmath>
+#include <immintrin.h>
+
 void softmax(Tensor<float>& x) {
     int size = x.size();
     float max_value = x[0];
@@ -29,9 +32,15 @@ void rms_norm(
 		sum += x[i] * x[i];
 	}
 
+
 	float rms = sqrt(eps + sum / size);
 
 	for (int i = 0; i < size; i++) {
 		y[i] = (x[i] / rms) * w[i];
 	}
 }
+
+void gqa(Tensor<float> q_proj, Tensor<float> k_proj, Tensor<float> v_proj, Tensor<float> o_proj) {
+    
+
+    }

@@ -2,20 +2,29 @@
 #include "tensor.hpp"
 #include "tokenizer.hpp"
 #include "model.hpp"
+#include "safetensors.hpp"
 
 #include <print>
 
 #include <iostream>
 
-int main() {
+int main(int argc, char* argv[]) {
+    
+    if (argc != 2) return 1;
+    auto dir = argv[1];
 
-    Tokenizer<4> tokenizer;
+    Tokenizer tok(151936);
 
-    tokenizer.vocab = {"ccc", "a", "b", "aa"};
-    auto idx = {0, 2, 1, 3};
-    auto n = tokenizer.decode(idx);
+    auto result = tok.from_file(dir);
 
-    std::cout << n << '\n';
+    if (!result.has_value()) {
+        std::println("File error: {}", static_cast<int>(result.error()));
+        return 1;
+    }
+
+    auto decoded = tok.decode({1, 2, 3, 100});
+
+    std::println("{}", decoded);
 
     return 0;
 

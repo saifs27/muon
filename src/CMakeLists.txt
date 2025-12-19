@@ -1,4 +1,4 @@
-add_executable(muon main.cpp math_cpu.cpp tensor.cpp tokenizer.cpp)
+add_executable(muon main.cpp math_cpu.cpp tensor.cpp tokenizer.cpp safetensors.cpp)
 target_compile_features(muon PRIVATE cxx_std_23)
 
 if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

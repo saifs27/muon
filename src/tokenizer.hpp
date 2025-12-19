@@ -1,14 +1,14 @@
 #pragma once
-#include <algorithm>
-#include <iostream>
-#include <numeric>
-#include <ranges>
 #include <string>
 #include <string_view>
+#include <filesystem>
 #include <unordered_map>
 #include <vector>
-#include <memory>
-#include <json.hpp>
+#include <expected>
+
+#include <iostream>
+
+#include "utils.hpp"
 
 struct Token {
     char str;
@@ -22,9 +22,6 @@ struct TrieNode {
 
 struct Trie {
     std::unique_ptr<TrieNode> root;
-
-
-
 };
 
 struct Tokenizer {
@@ -37,8 +34,11 @@ struct Tokenizer {
 
     Tokenizer(int vocab_size);
 
-    std::vector<int> encode(const std::string_view& text) const;
+    std::vector<int> encode(const std::string text) const;
     std::string decode(const std::vector<int>& tokens) const;
-    void from_file(char * file);
+    std::string decode_one(int token) const;
+
+    [[nodiscard]]
+    std::expected<void, FileError> from_file(const std::filesystem::path& file_path);
 
 };

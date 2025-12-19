@@ -1,11 +1,10 @@
 #pragma once
 #include <array>
 #include <vector>
-#include <stdfloat>
-#include <expected>
-#include <string_view>
-#include <format>
 #include <numeric>
+#include <expected>
+
+
 
 enum class DType {
     fp32,
@@ -16,10 +15,11 @@ enum class DType {
     i8,
 };
 
-enum class Error {
+enum class TensorError {
     DimensionError,
     IndexError,
 };
+
 
 template <typename dtype>
 struct Tensor {
@@ -49,7 +49,7 @@ struct Tensor {
     }
 
     int dim() const {
-        int non_zeros = 0;
+        auto non_zeros = 0;
 
         for (auto i: this->shape) {
             if (i > 0) non_zeros++;
@@ -63,14 +63,16 @@ struct Tensor {
 
     }
 
-    std::expected<void, std::string_view> transpose(int dim1 = -1, int dim2 = -2) {
-        const int dims = dim();
-        static_assert(dims >= 2, "Tensor must have at least 2 dimensions for transpose.");
+    [[nodiscard]]
+    std::expected<void, TensorError> transpose(int dim1 = -1, int dim2 = -2) {
+        const auto dims = dim();
+        if (dims < 2) return std::unexpected(TensorError::DimensionError);
+
         if (dim1 < 0) dim1 = dims + dim1;
         if (dim2 < 0) dim2 = dims + dim2;
 
-        if (dim1 < 0 || dim1 >= 0) return std::unexpected(std::format("Tensor is of dimension {}. dim1 of {} is out of bounds", dims, dim1));
-        if (dim2 < 0 || dim2 >= dims) return std::unexpected(std::format("Tensor is of dimension {}. dim1 of {} is out of bounds", dims, dim2));
+        if (dim1 < 0 || dim1 >= 0) return std::unexpected(TensorError::DimensionError);
+        if (dim2 < 0 || dim2 >= dims) return std::unexpected(TensorError::DimensionError);
 
         std::swap(shape[dim1], shape[dim2]);
         std::swap(stride[dim1], stride[dim2]);
