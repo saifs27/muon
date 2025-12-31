@@ -1,5 +1,3 @@
 #include "model.hpp"
 
-void Model::forward(int token) {
-
-}
+void Model::forward(int token) {}

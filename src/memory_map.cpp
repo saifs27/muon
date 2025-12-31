@@ -21,7 +21,7 @@ std::expected<MemoryMap, FileError> MemoryMap::map(const std::filesystem::path& 
         return std::unexpected(FileError::FileNotFound);
     }
 
-    auto file_size = std::filesystem::file_size(file_path, ec);
+    const auto file_size = std::filesystem::file_size(file_path, ec);
     if (file_size == 0) {
         return std::unexpected(FileError::FileEmpty);
     }
@@ -43,8 +43,8 @@ std::expected<MemoryMap, FileError> MemoryMap::map(const std::filesystem::path& 
             return std::unexpected(FileError::OpenFailed);
         }
 
-        HANDLE hMap = CreateFileMapping(
-            hFile, 
+        const HANDLE hMap =
+            CreateFileMapping(hFile,
             nullptr, 
             PAGE_READONLY, 
             0, 
@@ -59,8 +59,8 @@ std::expected<MemoryMap, FileError> MemoryMap::map(const std::filesystem::path& 
         mapped = MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
         CloseHandle(hMap);
     #else
-        auto path = file_path.native()
-        int fd = open(path.c_str(), O_RDONLY);
+    auto path = file_path.native();
+    int fd = open(path.c_str(), O_RDONLY);
         if (fd == -1) {
             return std::unexpected(FileError::OpenFailed);
         }

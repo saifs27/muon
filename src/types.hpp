@@ -1,13 +1,13 @@
 #pragma once
 #include <bit>
+#include <cstdint>
 
-
-struct bfloat16{
+struct bfloat16 {
     std::uint16_t bits;
 };
 
 inline float bf16_to_fp32(const bfloat16 bf16_bits) {
-    auto fp32_bits = static_cast<uint32_t>(bf16_bits.bits) << 16;
+    const auto fp32_bits = static_cast<uint32_t>(bf16_bits.bits) << 16;
     return std::bit_cast<float>(fp32_bits);
 }
 

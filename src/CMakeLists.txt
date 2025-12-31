@@ -1,4 +1,5 @@
-add_executable(muon main.cpp tokenizer.cpp safetensors.cpp memory_map.cpp)
+add_executable(muon "main.cpp" "tokenizer.cpp" "safetensors.cpp" "memory_map.cpp" "config.cpp" "utils.cpp"
+        types.hpp)
 target_compile_features(muon PRIVATE cxx_std_23)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

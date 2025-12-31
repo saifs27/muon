@@ -1,36 +1,78 @@
 #pragma once
-#include <stdfloat>
+#include <immintrin.h>
+#include <omp.h>
 
+#include <cmath>
+#include <stdfloat>
 
 #include "tensor.hpp"
 
-struct Shape {
-    int x = 0;
-    int y = 0;
-    int z = 0;
-};
+template <typename T>
+void matmul(Tensor<T>& result, const Tensor<T>& A, const Tensor<T>& B);
 
 template <typename T>
-void matmul(Tensor<T>& result, Tensor<T> A, Tensor<T> B);
+void silu(const Tensor<T>& x, Tensor<T>& output) {
+    for (int i = 0; i < x.size(); i++) {
+        output[i] = x.at(i) / (1.0f + expf(-x.at(i)));
+    }
+}
 
+template <typename T>
+void softmax(Tensor<T>& x) {
+    int size = x.size();
+    float max_value = x[0];
+    for (int i = 0; i < size; i++) {
+        if (x[i] > max_value) max_value = i;
+    }
 
-void softmax(Tensor<float> x);
+    // sum all values
+    float sum = 0;
+    for (int i = 0; i < size; i++) {
+        sum += std::exp(max_value - x[i]);
+    }
 
-void gemm(const Tensor<float>& A, const Tensor<float>& B, Tensor<float>& C);
+    for (int i = 0; i < size; i++) {
+        x[i] = std::exp(max_value - x[i]) / sum;
+    }
+}
 
-void swish(Tensor<float>& output, const Tensor<float>& input);
+template <typename T>
+void rms_norm(const Tensor<T>& x, const Tensor<T>& w, Tensor<T>& y, float eps,
+              int size) {
+    float sum = 0;
 
-void rms_norm(Tensor<float> input);
-void layer_norm();
-void rope();
+    for (int i = 0; i < size; i++) {
+        sum += x[i] * x[i];
+    }
 
+    float rms = sqrt(eps + sum / size);
+
+    for (int i = 0; i < size; i++) {
+        y[i] = (x[i] / rms) * w[i];
+    }
+}
+
+template <typename T>
+void layer_norm(const Tensor<T>& x, const Tensor<T>& w, T bias, float eps,
+                Tensor<T>& output) {
+    T expected;
+    T var;
+
+    T mean = [&]() {
+
+    };
+
+    for (int i = 0, size = x.size(); i < size; i++) {
+        output[i] = (x) / sqrt(x);
+    }
+}
+
+template <typename T>
+void rope(Tensor<T> vec);
 
 template <typename T>
 void linear(Tensor<T> x, Tensor<T>& w, float b);
 
-void gqa(
-    Tensor<float> q_proj, // [emb_dim, n_heads * head_dim]
-    Tensor<float> k_proj,
-    Tensor<float> v_proj,
-    Tensor<float> o_proj
-    );
+template <typename T>
+void gqa(Tensor<T> q_proj,  // [emb_dim, n_heads * head_dim]
+         Tensor<T> k_proj, Tensor<T> v_proj, Tensor<T> o_proj);

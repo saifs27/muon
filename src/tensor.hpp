@@ -1,12 +1,12 @@
 #pragma once
 #include <array>
-#include <vector>
-#include <numeric>
+#include <cstdint>
 #include <expected>
+#include <numeric>
+#include <string>
+#include <vector>
 
-
-
-enum class DType {
+enum class DType : uint8_t {
     fp32,
     fp16,
     bf16,
@@ -15,53 +15,52 @@ enum class DType {
     i8,
 };
 
-enum class TensorError {
+enum class TensorError : uint8_t {
     DimensionError,
     IndexError,
 };
 
+struct TensorMetadata {
+    std::string id;
+    std::array<int, 4> shape{};
+    size_t offset_begin;
+    size_t offset_end;
+    DType precision;
+};
 
-template <typename dtype>
+template <typename T>
 struct Tensor {
-    std::vector<dtype> data;
     std::array<int, 4> shape;
     std::array<int, 4> stride;
+    int offset_begin;
+    int offset_end;
+    DType precision;
 
+    Tensor(const float* data, const std::array<int, 4> shape) : shape(shape) {}
 
-    Tensor(const float* data, const std::array<int, 4> shape): shape(shape) {
+    T at(int idx) const {}
 
-        int N = size();
-
-        this->data.reserve(N);
-
-        for (int i = 0; i < N; i++) {
-            this->data[i] = data[i];
-        }
+    T at(const int i, const int j) const {
+        int idx = i * stride.at(0) + j * stride.at(1);
+        return data.at(idx);
     }
 
-    int size() const {
-        return std::accumulate(shape.cbegin(), shape.cend(), 0, [&](int sum, int idx) {
-            if (shape[idx] > 0) {
-                sum *= shape[idx];
-            }
-            return sum;
-        });
-    }
+    T at(int i, int j, int k) const;
+    T at(int i, int j, int k, int m) const;
+
+    int size() const { return data.size(); }
 
     int dim() const {
         auto non_zeros = 0;
 
-        for (auto i: this->shape) {
+        for (auto i : this->shape) {
             if (i > 0) non_zeros++;
         }
 
         return non_zeros;
     }
 
-    Tensor contiguous() const {
-
-
-    }
+    Tensor contiguous() const {}
 
     [[nodiscard]]
     std::expected<void, TensorError> transpose(int dim1 = -1, int dim2 = -2) {
@@ -71,13 +70,15 @@ struct Tensor {
         if (dim1 < 0) dim1 = dims + dim1;
         if (dim2 < 0) dim2 = dims + dim2;
 
-        if (dim1 < 0 || dim1 >= 0) return std::unexpected(TensorError::DimensionError);
-        if (dim2 < 0 || dim2 >= dims) return std::unexpected(TensorError::DimensionError);
+        if (dim1 < 0 || dim1 >= 0)
+            return std::unexpected(TensorError::DimensionError);
+        if (dim2 < 0 || dim2 >= dims)
+            return std::unexpected(TensorError::DimensionError);
 
         std::swap(shape[dim1], shape[dim2]);
         std::swap(stride[dim1], stride[dim2]);
     }
 
-    float operator[](size_t idx) const {return data.at(idx);}
-    float& operator[](size_t idx) {return data.at(idx);}
+    float operator[](size_t idx) const { return data.at(idx); }
+    float& operator[](size_t idx) { return data.at(idx); }
 };
