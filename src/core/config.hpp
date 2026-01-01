@@ -15,6 +15,7 @@ enum class ActivationType : uint8_t {
 };
 
 struct ModelConfig {
+    // Qwen 3 config for now
     int BOS = -1;
     int EOS = -1;
     int head_dim = -1;

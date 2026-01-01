@@ -4,8 +4,8 @@
 #include <string_view>
 #include <vector>
 
+#include "../backends/cpu/math_cpu.hpp"
 #include "config.hpp"
-#include "math_cpu.hpp"
 #include "tensor.hpp"
 #include "tokenizer.hpp"
 

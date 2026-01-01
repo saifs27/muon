@@ -29,9 +29,9 @@ std::expected<MemoryMap, FileError> MemoryMap::map(const std::filesystem::path& 
     length = file_size;
 
     #if defined(_WIN32)
-        auto path = file_path.native();
-        HANDLE hFile = CreateFileW(
-            path.c_str(), 
+    const auto& path = file_path.native();
+    HANDLE hFile =
+        CreateFileW(path.c_str(),
             GENERIC_READ, 
             FILE_SHARE_READ, 
             nullptr, 
@@ -43,7 +43,7 @@ std::expected<MemoryMap, FileError> MemoryMap::map(const std::filesystem::path& 
             return std::unexpected(FileError::OpenFailed);
         }
 
-        const HANDLE hMap =
+        HANDLE hMap =
             CreateFileMapping(hFile,
             nullptr, 
             PAGE_READONLY, 

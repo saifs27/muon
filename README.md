@@ -6,7 +6,15 @@ Muon is an LLM inference implementation written in C++.
 
 To build, Muon requires a C++23 compatible compiler and CMake 3.31.
 
+To build the CPU backend, use:
 ```
-cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
-cmake --build build
+cmake --preset release
+cmake --build --preset release
+```
+
+And for the SYCL backend:
+
+```
+cmake --preset sycl-release
+cmake --build --preset sycl-release
 ```

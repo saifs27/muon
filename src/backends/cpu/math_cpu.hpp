@@ -5,7 +5,7 @@
 #include <cmath>
 #include <stdfloat>
 
-#include "tensor.hpp"
+#include "../../core/tensor.hpp"
 
 template <typename T>
 void matmul(Tensor<T>& result, const Tensor<T>& A, const Tensor<T>& B);

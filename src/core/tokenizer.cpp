@@ -1,7 +1,6 @@
 #include "tokenizer.hpp"
 
 #include <algorithm>
-#include <fstream>
 #include <json.hpp>
 #include <numeric>
 #include <ranges>
@@ -9,11 +8,11 @@
 #include "utils.hpp"
 
 std::expected<Tokenizer, FileError> Tokenizer::load(
-    const ModelConfig& config, const std::filesystem::path& file_path) {
+    const ModelConfig& config, const std::filesystem::path& path) {
     std::vector<std::string> vocab;
     vocab.resize(config.vocab_size);
 
-    auto json = json::to_json(file_path);
+    auto json = json::to_json(path);
 
     if (!json.has_value()) {
         return std::unexpected(json.error());
@@ -30,7 +29,7 @@ std::expected<Tokenizer, FileError> Tokenizer::load(
         return idx >= 0 && idx < config.vocab_size;
     };
 
-    for (auto token : vocab_list.value().items()) {
+    for (const auto token : vocab_list.value().items()) {
         if (!is_in_range(token.value()))
             return std::unexpected(FileError::UnexpectedData);
         vocab[token.value()] = token.key();
@@ -52,20 +51,16 @@ std::expected<Tokenizer, FileError> Tokenizer::load(
 
 std::string Tokenizer::decode(const std::vector<int>& tokens) const {
     std::string res;
-    int string_size = std::accumulate(tokens.cbegin(), tokens.cend(), 0,
-                                      [&](int sum, int idx) {
-                                          sum += m.vocab[idx].size();
-                                          return sum;
-                                      });
-
-    std::cout << tokens.size() << '\n';
+    const int string_size = std::accumulate(tokens.cbegin(), tokens.cend(), 0,
+                                            [&](int sum, const int idx) {
+                                                sum += m.vocab[idx].size();
+                                                return sum;
+                                            });
 
     res.reserve(string_size);
-    std::cout << string_size << '\n';
 
-    for (int i = 0, size = tokens.size(); i < size; i++) {
-        std::cout << m.vocab[tokens[i]] << '\n';
-        res.append(m.vocab[tokens[i]]);
+    for (const auto token : tokens) {
+        res.append(m.vocab[token]);
     }
 
     return res;

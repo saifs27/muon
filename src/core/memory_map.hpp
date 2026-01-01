@@ -1,10 +1,11 @@
 #pragma once
 
-#include <expected>
-#include <span>
-#include <filesystem>
-#include <string_view>
 #include <cstdint>
+#include <expected>
+#include <filesystem>
+#include <span>
+#include <string_view>
+
 #include "utils.hpp"
 
 struct MemoryMap {

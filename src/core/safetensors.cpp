@@ -36,7 +36,7 @@ std::expected<std::string, FileError> read_header(const std::filesystem::path& p
     if (!file) return std::unexpected(FileError::OpenFailed);
 
     // Read first 8 bytes to get header size
-    std::array<std::uint8_t, 8> buffer;
+    std::array<std::uint8_t, 8> buffer{};
 
     if (!file.read(std::bit_cast<char*>(buffer.data()), buffer.size())) {
         return std::unexpected(FileError::ReadFailed);

@@ -1,0 +1,82 @@
+{
+  "version": 10,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 31,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "MUON_BACKEND": "CPU"
+      }
+    },
+    {
+      "name": "sycl-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "icx",
+        "CMAKE_C_COMPILER": "icx",
+        "CMAKE_CXX_FLAGS": "-fsycl",
+        "MUON_BACKEND": "SYCL"
+      }
+    },
+    {
+      "name": "debug",
+      "displayName": "Debug",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "Release",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "sycl-debug",
+      "displayName": "SYCL (Intel oneAPI) Debug",
+      "inherits": "sycl-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "sycl-release",
+      "inherits": "sycl-base",
+      "displayName": "SYCL (Intel oneAPI) Release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "configurePreset": "debug"
+    },
+    {
+      "name": "release",
+      "configurePreset": "release"
+    },
+    {
+      "name": "sycl-debug",
+      "configurePreset": "sycl-debug"
+    },
+    {
+      "name": "sycl-release",
+      "configurePreset": "sycl-release"
+    }
+  ]
+}

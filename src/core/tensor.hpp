@@ -32,6 +32,7 @@ template <typename T>
 struct Tensor {
     std::array<int, 4> shape;
     std::array<int, 4> stride;
+    std::vector<T> data;
     int offset_begin;
     int offset_end;
     DType precision;
@@ -70,7 +71,7 @@ struct Tensor {
         if (dim1 < 0) dim1 = dims + dim1;
         if (dim2 < 0) dim2 = dims + dim2;
 
-        if (dim1 < 0 || dim1 >= 0)
+        if (dim1 < 0 || dim1 >= dims)
             return std::unexpected(TensorError::DimensionError);
         if (dim2 < 0 || dim2 >= dims)
             return std::unexpected(TensorError::DimensionError);

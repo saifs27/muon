@@ -11,22 +11,22 @@ std::expected<ModelConfig, FileError> from_file(
         return std::unexpected(json_data.error());
     }
 
-    auto get_int = [&json_data](std::string id) {
+    auto get_int = [&json_data](const std::string& id) {
         return json::access(json_data.value(), id).value_or(-1).get<int>();
     };
 
-    auto get_double = [&json_data](std::string id) {
+    auto get_double = [&json_data](const std::string& id) {
         return json::access(json_data.value(), id).value_or(-1).get<double>();
     };
 
-    auto get_act = [&json_data](std::string id) {
+    auto get_act = [&json_data](const std::string& id) {
         auto str =
             json::access(json_data.value(), id).value_or("").get<std::string>();
         if (str == "silu") {
             return ActivationType::SILU;
         }
 
-        else if (str == "gelu") {
+        if (str == "gelu") {
             return ActivationType::GELU;
         }
         return ActivationType::NotImplemented;
