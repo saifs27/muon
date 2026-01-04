@@ -21,4 +21,4 @@ cmake --build --preset sycl-release
 
 ## Usage
 
-Muon requires a huggingface config.json, tokenizer.json, and a .safetensors file. Simly run 
+Muon requires a huggingface config.json, tokenizer.json, and a .safetensors file.
