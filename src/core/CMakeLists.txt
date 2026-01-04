@@ -16,5 +16,5 @@ endif ()
 
 add_library(nlohmann_json INTERFACE)
 target_include_directories(nlohmann_json INTERFACE ${PROJECT_SOURCE_DIR}/vendor/nlohmann)
-target_link_libraries(muon_core PUBLIC nlohmann_json)
+target_link_libraries(muon_core PUBLIC nlohmann_json muon_backend)
 
