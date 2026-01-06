@@ -1,6 +1,6 @@
 #include <iostream>
 #include <filesystem>
-
+#include "../core/utils.hpp"
 #include "../core/config.hpp"
 #include "../core/model.hpp"
 #include "../core/safetensors.hpp"
@@ -8,23 +8,42 @@
 
 
 int main(int argc, char* argv[]) {
-    if (argc != 2) return -1;
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << "<model_directory>\n";
+        return -1;
+    }
 
     std::error_code ec;
     std::filesystem::path dir(argv[1]);
     
-    if (!std::filesystem::exists(dir, ec)) { return -1;}
-    if (!std::filesystem::is_directory(dir, ec)) { return -1;}
+    if (!std::filesystem::exists(dir, ec)) { 
+        std::cerr << "File path: " << dir << " does not exist" << file_error_to_string(tokenizer.error());
+        return -1;
+    }
+
+    if (!std::filesystem::is_directory(dir, ec)) {
+        std::cerr << "File path " << dir << " is not a directory";
+         return -1;
+    }
     
 
     const auto config = get_config(dir / "config.json");
-    if (!config.has_value()) { return -3;}
+    if (!config.has_value()) {
+        std::cerr << "Failed to load config. Error: " << file_error_to_string(config.error());
+        return -1;
+    }
 
     const auto tokenizer = Tokenizer::load(config.value(), dir / "tokenizer.json");
-    if (!tokenizer.has_value()) { return -4;}
+    if (!tokenizer.has_value()) { 
+        std::cerr << "Failed to load tokenizer. Error: " << file_error_to_string(tokenizer.error());
+        return -1;
+    }
 
     const auto sf = SafeTensors::load(dir / "model.safetensors");
-    if (!sf.has_value()) {return -5;}
+    if (!sf.has_value()) {
+        std::cerr << "Failed to load safetensors. Error: " << file_error_to_string(sf.error());
+        return -1;
+    }
 
 
 

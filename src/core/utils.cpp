@@ -1,6 +1,22 @@
 #include "utils.hpp"
-
 #include <fstream>
+
+std::string file_err_to_string(FileError err) {
+    switch(err) {
+        case FileError::FileNotFound : return "File not found";
+        case FileError::ReadFailed : return "Failed to read file";
+        case FileError::OpenFailed : return "Failed to open file";
+        case FileError::SeekFailed : return "Failed to seek file";
+        case FileError::UnexpectedData : return "Unexpected data in file";
+        case FileError::FileEmpty : return "File is empty";
+        case FileError::FileTooLarge : return "File is too large";
+        case FileError::MappingFailed : return "Mapping of file failed";
+        case FileError::JsonParseFailed : return "Json parsing of file failed";
+        case FileError::JsonUnexpectedData : return "Unexpected data in json file";
+        case FileError::JsonAccessFailed : return "Failed to access element in json file";
+    };
+}
+
 namespace json {
 std::expected<nlohmann::basic_json<>, FileError> to_json(
     const std::filesystem::path& path) {

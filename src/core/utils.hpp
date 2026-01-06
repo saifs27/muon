@@ -18,6 +18,8 @@ enum class FileError {
     JsonAccessFailed,
 };
 
+std::string file_error_to_string(FileError err);
+
 // helper functions around json library to use std::expected for error handling
 // instead of throwing exceptions
 namespace json {
