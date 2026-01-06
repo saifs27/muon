@@ -31,5 +31,5 @@ struct ModelConfig {
     ActivationType hidden_act = ActivationType::NotImplemented;
 };
 
-std::expected<ModelConfig, FileError> from_file(
+std::expected<ModelConfig, FileError> get_config(
     const std::filesystem::path& path);

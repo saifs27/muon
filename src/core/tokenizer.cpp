@@ -9,6 +9,11 @@
 
 std::expected<Tokenizer, FileError> Tokenizer::load(
     const ModelConfig& config, const std::filesystem::path& path) {
+
+    if (!std::filesystem::exists(path)) {
+        return std::unexpected(FileError::FileNotFound);
+    }
+
     std::vector<std::string> vocab;
     vocab.resize(config.vocab_size);
 

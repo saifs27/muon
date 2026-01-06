@@ -3,8 +3,11 @@
 #include <fstream>
 #include <json.hpp>
 
-std::expected<ModelConfig, FileError> from_file(
-    const std::filesystem::path& path) {
+std::expected<ModelConfig, FileError> get_config(const std::filesystem::path& path) {
+    if (!std::filesystem::exists(path)) {
+        return std::unexpected(FileError::FileNotFound);
+    }
+
     const auto json_data = json::to_json(path);
 
     if (!json_data.has_value()) {
