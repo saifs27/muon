@@ -7,14 +7,14 @@
 #include "../core/tokenizer.hpp"
 
 
-int main(int argc, char* argv[]) {
+int main(const int argc, char* argv[]) {
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << "<model_directory>\n";
         return -1;
     }
 
     std::error_code ec;
-    std::filesystem::path dir(argv[1]);
+    const std::filesystem::path dir(argv[1]);
     
     if (!std::filesystem::exists(dir, ec)) { 
         std::cerr << "File path: " << dir << " does not exist";
@@ -42,6 +42,12 @@ int main(int argc, char* argv[]) {
     const auto sf = SafeTensors::load(dir / "model.safetensors");
     if (!sf.has_value()) {
         std::cerr << "Failed to load safetensors. Error: " << file_err_to_string(sf.error());
+        return -1;
+    }
+    auto metadata = sf.value().get_tensors();
+
+    if (!metadata.has_value()) {
+        std::cerr << "Failed to get metadata";
         return -1;
     }
 

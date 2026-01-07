@@ -22,9 +22,5 @@ class SafeTensors {
 
     [[nodiscard]] size_t header_size() const noexcept { return m.header_size; }
     [[nodiscard]] std::expected<std::string, FileError> read_header() const;
-    [[nodiscard]] std::expected<Tensor<float>, FileError> get_tensor() const;
+    [[nodiscard]] std::expected<Metadata, FileError> get_tensors() const;
 };
-
-[[nodiscard]]
-std::expected<std::string, FileError> read_header(
-    const std::filesystem::path& path);

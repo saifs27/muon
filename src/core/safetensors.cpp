@@ -3,6 +3,7 @@
 #include <array>
 #include <bit>
 #include <cstdint>
+#include <cassert>
 #include <fstream>
 #include <json.hpp>
 
@@ -28,34 +29,65 @@ std::expected<SafeTensors, FileError> SafeTensors::load(
 }
 
 
-[[nodiscard]]
-std::expected<std::string, FileError> read_header(const std::filesystem::path& path) {
-    if (!std::filesystem::exists(path))
-        return std::unexpected(FileError::FileNotFound);
-    std::ifstream file(path, std::ios::binary);
-    if (!file) return std::unexpected(FileError::OpenFailed);
+std::expected<std::string, FileError> SafeTensors::read_header() const {
+    auto bytes = m.map.view_data();
 
-    // Read first 8 bytes to get header size
-    std::array<std::uint8_t, 8> buffer{};
-
-    if (!file.read(std::bit_cast<char*>(buffer.data()), buffer.size())) {
+    if (bytes.size() < (8 + m.header_size)) {
         return std::unexpected(FileError::ReadFailed);
     }
 
-    auto header_size = std::bit_cast<std::uint64_t>(buffer);
-
-    // Read header
-    std::string header_json;
-
-    header_json.resize_and_overwrite(header_size, [&](char* buffer, size_t n) {
-        file.read(buffer, n);
-        return file.gcount();
-    });
-
-    if (file.gcount() != static_cast<std::streamsize>(header_size)) {
-        return std::unexpected(FileError::ReadFailed);
-    }
-
-    return header_json;
+    const char* data_ptr = std::bit_cast<const char*>(bytes.data());
+    std::string header(data_ptr + 8, m.header_size);
+    return header;
 }
+
+std::expected<Metadata, FileError> SafeTensors::get_tensors() const {
+    // read header
+    auto bytes = m.map.view_data();
+
+    if (bytes.size() < (8 + m.header_size)) {
+        return std::unexpected(FileError::ReadFailed);
+    }
+
+    const char* data_ptr = std::bit_cast<const char*>(bytes.data());
+    std::string header(data_ptr + 8, m.header_size);
+    
+    
+    // parse header
+    auto data = nlohmann::json::parse(header);
+
+    std::vector<TensorMetadata> tensors;
+    tensors.reserve((data.size() - 1));
+
+    for (auto& [key, value] : data.items()) {
+        if (key == "__metadata__") {
+            continue;
+        }
+
+        auto shape_data = json::access(value, "shape");
+        auto offset_data = json::access(value, "data_offsets");
+        auto precision_data = json::access(value, "dtype");
+
+        if (!shape_data.has_value() ||!offset_data.has_value() || !precision_data.has_value()) {
+            return std::unexpected(FileError::JsonAccessFailed);
+        }
+
+        auto data_offsets = offset_data.value().get<std::array<uint64_t, 2>>();
+        auto shape = shape_data.value().get<std::vector<int>>();
+        assert(shape.size() <= 4);
+
+        tensors.emplace_back(TensorMetadata {
+            .id = key,
+            .shape = shape,
+            .offset_begin = data_offsets[0],
+            .offset_end = data_offsets[1],
+            .precision =  str_to_tensor_dtype(precision_data.value()),
+        });
+
+        
+    }
+
+    return tensors;
+}
+
 
