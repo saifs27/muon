@@ -5,6 +5,8 @@ build
 *.exe
 *.obj
 
+*.pdb
+
 /.vs
 /.vscode
 /.idea

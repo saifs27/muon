@@ -2,7 +2,6 @@
 #include <expected>
 #include <filesystem>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "config.hpp"
@@ -13,14 +12,9 @@ struct Token {
     int id;
 };
 
-struct TrieNode {
-    std::unordered_map<Token, TrieNode> children;
-    bool terminal = false;
-};
 
-struct Trie {
-    std::unique_ptr<TrieNode> root;
-};
+
+
 
 class Tokenizer {
    private:

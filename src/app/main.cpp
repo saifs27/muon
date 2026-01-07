@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     std::filesystem::path dir(argv[1]);
     
     if (!std::filesystem::exists(dir, ec)) { 
-        std::cerr << "File path: " << dir << " does not exist" << file_error_to_string(tokenizer.error());
+        std::cerr << "File path: " << dir << " does not exist";
         return -1;
     }
 
@@ -29,19 +29,19 @@ int main(int argc, char* argv[]) {
 
     const auto config = get_config(dir / "config.json");
     if (!config.has_value()) {
-        std::cerr << "Failed to load config. Error: " << file_error_to_string(config.error());
+        std::cerr << "Failed to load config. Error: " << file_err_to_string(config.error());
         return -1;
     }
 
     const auto tokenizer = Tokenizer::load(config.value(), dir / "tokenizer.json");
     if (!tokenizer.has_value()) { 
-        std::cerr << "Failed to load tokenizer. Error: " << file_error_to_string(tokenizer.error());
+        std::cerr << "Failed to load tokenizer. Error: " << file_err_to_string(tokenizer.error());
         return -1;
     }
 
     const auto sf = SafeTensors::load(dir / "model.safetensors");
     if (!sf.has_value()) {
-        std::cerr << "Failed to load safetensors. Error: " << file_error_to_string(sf.error());
+        std::cerr << "Failed to load safetensors. Error: " << file_err_to_string(sf.error());
         return -1;
     }
 
