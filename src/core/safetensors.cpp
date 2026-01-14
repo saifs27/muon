@@ -6,6 +6,7 @@
 #include <cassert>
 #include <fstream>
 #include <json.hpp>
+#include <algorithm>
 
 std::expected<SafeTensors, FileError> SafeTensors::load(
     const std::filesystem::path& path) {
@@ -41,7 +42,7 @@ std::expected<std::string, FileError> SafeTensors::read_header() const {
     return header;
 }
 
-std::expected<Metadata, FileError> SafeTensors::get_tensors() const {
+std::expected<Metadata, FileError> SafeTensors::get_metadata() const {
     // read header
     auto bytes = m.map.view_data();
 
@@ -49,12 +50,17 @@ std::expected<Metadata, FileError> SafeTensors::get_tensors() const {
         return std::unexpected(FileError::ReadFailed);
     }
 
-    const char* data_ptr = std::bit_cast<const char*>(bytes.data());
-    std::string header(data_ptr + 8, m.header_size);
+    const auto data_ptr = std::bit_cast<const char*>(bytes.data());
+    const std::string header(data_ptr + 8, m.header_size);
     
     
     // parse header
-    auto data = nlohmann::json::parse(header);
+    auto data = nlohmann::json::parse(header, nullptr, false);
+
+    if (data.is_discarded()) {
+        return std::unexpected(FileError::JsonParseFailed);
+    }
+
 
     std::vector<TensorMetadata> tensors;
     tensors.reserve((data.size() - 1));
@@ -73,15 +79,21 @@ std::expected<Metadata, FileError> SafeTensors::get_tensors() const {
         }
 
         auto data_offsets = offset_data.value().get<std::array<uint64_t, 2>>();
-        auto shape = shape_data.value().get<std::vector<int>>();
-        assert(shape.size() <= 4);
+        auto shape_vec = shape_data.value().get<std::vector<int>>();
+        auto precision = precision_data.value().get<std::string>();
+
+        assert(shape_vec.size() <= 4);
+        std::array<int, 4> shape{};
+        std::copy(shape_vec.begin(), shape_vec.end(), shape);
+
+
 
         tensors.emplace_back(TensorMetadata {
             .id = key,
             .shape = shape,
             .offset_begin = data_offsets[0],
             .offset_end = data_offsets[1],
-            .precision =  str_to_tensor_dtype(precision_data.value()),
+            .precision =  str_to_tensor_dtype(precision),
         });
 
         

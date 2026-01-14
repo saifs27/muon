@@ -76,7 +76,7 @@ std::expected<MemoryMap, FileError> MemoryMap::map(const std::filesystem::path& 
     #endif
 
     return MemoryMap(M{
-        .data = mapped,
+        .data = static_cast<std::byte *>(mapped),
         .length = length,
     });
 }

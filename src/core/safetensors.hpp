@@ -22,5 +22,17 @@ class SafeTensors {
 
     [[nodiscard]] size_t header_size() const noexcept { return m.header_size; }
     [[nodiscard]] std::expected<std::string, FileError> read_header() const;
-    [[nodiscard]] std::expected<Metadata, FileError> get_tensors() const;
+    [[nodiscard]] std::expected<Metadata, FileError> get_metadata() const;
+
+    std::byte * data() const {return m.map.data();}
+
+    std::span<std::byte> view_range(size_t start, size_t end) const & {
+        auto data = m.map.view_data();
+
+        assert(end > start);
+        assert( end <= m.map.size());
+
+        return data.subspan(start, end);
+
+    }
 };
