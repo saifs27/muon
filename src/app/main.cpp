@@ -1,11 +1,10 @@
 #include <iostream>
 #include <filesystem>
-#include "../core/utils.hpp"
-#include "../core/config.hpp"
-#include "../core/model.hpp"
-#include "../core/safetensors.hpp"
-#include "../core/tokenizer.hpp"
-
+#include "core/utils.hpp"
+#include "core/config.hpp"
+#include "model/qwen3/qwen3.hpp"
+#include "core/safetensors.hpp"
+#include "core/tokenizer.hpp"
 
 int main(const int argc, char* argv[]) {
     if (argc != 2) {
@@ -44,12 +43,13 @@ int main(const int argc, char* argv[]) {
         std::cerr << "Failed to load safetensors. Error: " << file_err_to_string(sf.error());
         return -1;
     }
-    auto metadata = sf.value().get_tensors();
 
-    if (!metadata.has_value()) {
-        std::cerr << "Failed to get metadata";
+    auto model = qwen3::Model::load(sf.value());
+    if (!model.has_value()) {
+        std::cerr << "Failed to load model_weights.";
         return -1;
     }
+
 
 
 

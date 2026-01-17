@@ -1,10 +1,17 @@
-add_library(muon_backend_cpu math_cpu.cpp)
+add_library(muon_backend_cpu
+        rope.cpp
+        softmax.cpp
+        rmsnorm.cpp
+        matmul.cpp)
 
 target_compile_features(muon_backend_cpu PRIVATE cxx_std_23)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_link_libraries(muon_backend_cpu PRIVATE stdc++exp)
 endif ()
+
+target_compile_options(muon_backend_cpu PRIVATE -mavx512f)
+
 
 find_package(OpenMP)
 if (OpenMP_CXX_FOUND)

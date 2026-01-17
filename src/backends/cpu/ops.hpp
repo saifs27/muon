@@ -4,75 +4,48 @@
 
 #include <cmath>
 #include <stdfloat>
+#include <cstdint>
+#include <span>
+#include "core/types.hpp"
+#include "core/tensor.hpp"
+#include <stdfloat>
 
-#include "../../core/tensor.hpp"
+// activations
 
-template <typename T>
-void matmul(Tensor<T>& result, const Tensor<T>& A, const Tensor<T>& B);
+constexpr void silu(const Tensor<std::bfloat16_t> x, Tensor<std::bfloat16_t> output) {
 
-template <typename T>
-void silu(const Tensor<T>& x, Tensor<T>& output) {
-    for (int i = 0; i < x.size(); i++) {
-        output[i] = x.at(i) / (1.0f + expf(-x.at(i)));
-    }
 }
 
-template <typename T>
-void softmax(Tensor<T>& x) {
-    int size = x.size();
-    float max_value = x[0];
-    for (int i = 0; i < size; i++) {
-        if (x[i] > max_value) max_value = i;
-    }
+// ----------------------------------------------------
 
-    // sum all values
-    float sum = 0;
-    for (int i = 0; i < size; i++) {
-        sum += std::exp(max_value - x[i]);
-    }
+void matmul(const Tensor<std::bfloat16_t> x, const Tensor<std::bfloat16_t> w, Tensor<std::bfloat16_t> out);
 
-    for (int i = 0; i < size; i++) {
-        x[i] = std::exp(max_value - x[i]) / sum;
-    }
-}
+void softmax(Tensor<std::bfloat16_t> x);
+void rms_norm(
+    const Tensor<std::bfloat16_t> x,
+    const Tensor<std::bfloat16_t> w,
+    Tensor<std::bfloat16_t> y,
+    float eps);
 
-template <typename T>
-void rms_norm(const Tensor<T>& x, const Tensor<T>& w, Tensor<T>& y, float eps,
-              int size) {
-    float sum = 0;
+void layer_norm(
+    Tensor<std::bfloat16_t> x,
+    Tensor<std::bfloat16_t> w,
+    float bias,
+    float eps,
+    Tensor<std::bfloat16_t> output);
 
-    for (int i = 0; i < size; i++) {
-        sum += x[i] * x[i];
-    }
+void rope(
+    Tensor<std::bfloat16_t> output,
+    Tensor<std::bfloat16_t> input
+    );
 
-    float rms = sqrt(eps + sum / size);
 
-    for (int i = 0; i < size; i++) {
-        y[i] = (x[i] / rms) * w[i];
-    }
-}
+void rope_qk(
+    Tensor<std::bfloat16_t> Q, // (batch, head_dim, seq_len)
+    Tensor<std::bfloat16_t> K);
 
-template <typename T>
-void layer_norm(const Tensor<T>& x, const Tensor<T>& w, T bias, float eps,
-                Tensor<T>& output) {
-    T expected;
-    T var;
 
-    T mean = [&]() {
-
-    };
-
-    for (int i = 0, size = x.size(); i < size; i++) {
-        output[i] = (x) / sqrt(x);
-    }
-}
-
-template <typename T>
-void rope(Tensor<T> vec);
-
-template <typename T>
-void linear(Tensor<T> x, Tensor<T>& w, float b);
-
-template <typename T>
-void gqa(Tensor<T> q_proj,  // [emb_dim, n_heads * head_dim]
-         Tensor<T> k_proj, Tensor<T> v_proj, Tensor<T> o_proj);
+void gqa(Tensor<std::bfloat16_t> q_proj,  // (emb_dim, n_heads * head_dim)
+         Tensor<std::bfloat16_t> k_proj,
+         Tensor<std::bfloat16_t> v_proj,
+         Tensor<std::bfloat16_t> o_proj);

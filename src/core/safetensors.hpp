@@ -32,7 +32,8 @@ class SafeTensors {
         assert(end > start);
         assert( end <= m.map.size());
 
-        return data.subspan(start, end);
+
+        return data.subspan(start, end - start);
 
     }
 };

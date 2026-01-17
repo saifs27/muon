@@ -2,6 +2,8 @@
 #include <bit>
 #include <cstdint>
 
+using bf16 = uint16_t;
+
 struct bfloat16 {
     std::uint16_t bits;
 };

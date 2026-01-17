@@ -8,6 +8,11 @@
 #include <string_view>
 #include <span>
 #include "types.hpp"
+#include <memory>
+#include <flat_map>
+#include <stdfloat>
+#include <charconv>
+#include <map>
 
 enum class DType : uint8_t {
     fp32,
@@ -42,35 +47,66 @@ enum class TensorError : uint8_t {
     IndexError,
 };
 
+
+template <typename T = std::bfloat16_t>
+struct Tensor {
+    std::span<T> data {};
+    std::array<int, 4> shape {};
+
+    Tensor() = default;
+
+    // constructor for accepting raw bytes from safetensors file
+    Tensor(const std::span<std::byte> raw_bytes, const std::array<int, 4> shape)
+        : shape(shape) {
+            auto count = raw_bytes.size_bytes() / sizeof(T);
+            data = std::span<T>(std::bit_cast<T*>(raw_bytes.data()), count);
+        }
+
+
+    Tensor(const std::span<T> data, std::array<int, 4> shape) :
+        data(data), shape(shape) {}
+
+
+    std::span<T> view() const {
+        return data;
+    }
+
+    int64_t size() const {
+        return data.size();
+    }
+
+};
+
 struct TensorMetadata {
-    std::string id = "";
     std::array<int, 4> shape {0, 0, 0, 0};
     size_t offset_begin = 0;
     size_t offset_end = 0;
     DType precision = DType::bf16;
 };
 
-using Metadata = std::vector<TensorMetadata>;
+inline int get_layer_idx(std::string_view id) {
+    auto digits = id 
+        | std::views::split('.')
+        | std::views::filter([](auto&& part){
+            return std::ranges::all_of(part, [](unsigned char c) {
+                return std::isdigit(c);
+            });
+        })
+        | std::ranges::to<std::vector<std::string>>();
 
-template <typename T>
-struct Tensor {
-    std::span<std::byte> data;
-    std::array<int, 4> shape {0, 0, 0, 0};    
+        if (digits.size() != 1) {return -1;}
+        return std::stoi(digits[0]);
+    };
 
-    Tensor(const std::span<std::byte> data, const TensorMetadata metadata) 
-        : data(data), shape(metadata.shape) {}
+using Metadata = std::flat_map<std::string, TensorMetadata>;
 
-    int n_bytes() const {
-        if constexpr (T == bf16) {return 2;}
-        if constexpr (T == int8_t) {return 1;}
-    }
-    int64_t size() {
-        auto bytes = data.size_bytes();
-        auto dtype_size = dtype_to_n_bytes(metadata.precision);
-        assert(bytes > 0);
-        assert (dtype_size != 0);
-        return bytes / dtype_size;
-    }
 
-};
 
+inline std::vector<Metadata> group_metadata_by_layer(const Metadata& meta, int n_layers) {
+    auto grouped_meta = meta 
+        | std::views::chunk_by([&](const auto& a, const auto& b) { return get_layer_idx(a.first) == get_layer_idx(b.first); })
+        | std::ranges::to<std::vector<Metadata>>();
+
+
+    return grouped_meta; 
+}

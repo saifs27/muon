@@ -1,4 +1,4 @@
-add_library(model qwen3.cpp)
+add_library(model qwen3/qwen3.cpp qwen3/block.hpp)
 
 target_compile_features(model PRIVATE cxx_std_23)
 
@@ -7,3 +7,5 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif ()
 
 target_link_libraries(model PUBLIC muon_core muon_backend)
+
+target_include_directories(model PUBLIC ${PROJECT_SOURCE_DIR}/src)

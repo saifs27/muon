@@ -7,6 +7,7 @@
 #include <fstream>
 #include <json.hpp>
 #include <algorithm>
+#include <ranges>
 
 std::expected<SafeTensors, FileError> SafeTensors::load(
     const std::filesystem::path& path) {
@@ -61,9 +62,12 @@ std::expected<Metadata, FileError> SafeTensors::get_metadata() const {
         return std::unexpected(FileError::JsonParseFailed);
     }
 
+    auto cmp = [&](auto& a, auto& b) {
+        return get_layer_idx(a) < get_layer_idx(b);
+    };
 
-    std::vector<TensorMetadata> tensors;
-    tensors.reserve((data.size() - 1));
+
+    Metadata tensors;
 
     for (auto& [key, value] : data.items()) {
         if (key == "__metadata__") {
@@ -84,19 +88,16 @@ std::expected<Metadata, FileError> SafeTensors::get_metadata() const {
 
         assert(shape_vec.size() <= 4);
         std::array<int, 4> shape{};
-        std::copy(shape_vec.begin(), shape_vec.end(), shape);
+        size_t copy_count = std::min(shape_vec.size(), shape.size());
+        std::ranges::copy_n(shape_vec.begin(), copy_count, shape.begin());
 
 
-
-        tensors.emplace_back(TensorMetadata {
-            .id = key,
+        tensors[key] = TensorMetadata {
             .shape = shape,
             .offset_begin = data_offsets[0],
             .offset_end = data_offsets[1],
             .precision =  str_to_tensor_dtype(precision),
-        });
-
-        
+        };
     }
 
     return tensors;

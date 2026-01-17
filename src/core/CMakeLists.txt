@@ -1,7 +1,6 @@
-add_library(muon_core config.cpp
-        inference.cpp
+add_library(muon_core 
+        config.cpp
         memory_map.cpp
-        model.cpp
         safetensors.cpp
         sample.cpp
         tokenizer.cpp
@@ -16,5 +15,6 @@ endif ()
 
 add_library(nlohmann_json INTERFACE)
 target_include_directories(nlohmann_json INTERFACE ${PROJECT_SOURCE_DIR}/vendor/nlohmann)
-target_link_libraries(muon_core PUBLIC nlohmann_json muon_backend)
 
+target_link_libraries(muon_core PUBLIC nlohmann_json)
+target_include_directories(muon_core PUBLIC ${PROJECT_SOURCE_DIR}/src)

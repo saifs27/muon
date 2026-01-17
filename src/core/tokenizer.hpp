@@ -12,10 +12,6 @@ struct Token {
     int id;
 };
 
-
-
-
-
 class Tokenizer {
    private:
     struct M {

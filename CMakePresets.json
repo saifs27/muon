@@ -1,8 +1,8 @@
 {
-  "version": 9,
+  "version": 8,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 31,
+    "minor": 28,
     "patch": 0
   },
   "configurePresets": [
@@ -21,7 +21,7 @@
       "hidden": true,
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/${presetName}",
-    
+
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "CMAKE_CXX_COMPILER": "icx",
@@ -34,10 +34,12 @@
       "name": "debug",
       "displayName": "Debug",
       "inherits": "base",
+
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
+
     {
       "name": "release",
       "displayName": "Release",

@@ -11,3 +11,4 @@ else ()
     message(FATAL_ERROR "Unsupported Backend. MUON_BACKEND='${MUON_BACKEND}'. Available backends: CPU, SYCL.")
 endif ()
 
+target_include_directories(muon_backend INTERFACE ${PROJECT_SOURCE_DIR}/src)
