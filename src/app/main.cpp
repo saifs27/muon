@@ -1,10 +1,11 @@
-#include <iostream>
 #include <filesystem>
-#include "core/utils.hpp"
+#include <iostream>
+
 #include "core/config.hpp"
-#include "model/qwen3/qwen3.hpp"
 #include "core/safetensors.hpp"
 #include "core/tokenizer.hpp"
+#include "core/utils.hpp"
+#include "model/qwen3/model.hpp"
 
 int main(const int argc, char* argv[]) {
     if (argc != 2) {
@@ -49,8 +50,6 @@ int main(const int argc, char* argv[]) {
         std::cerr << "Failed to load model_weights.";
         return -1;
     }
-
-
 
 
     return 0;

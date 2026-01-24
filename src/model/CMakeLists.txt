@@ -1,4 +1,4 @@
-add_library(model qwen3/qwen3.cpp qwen3/block.hpp)
+add_library(model qwen3/model.cpp qwen3/block.hpp)
 
 target_compile_features(model PRIVATE cxx_std_23)
 

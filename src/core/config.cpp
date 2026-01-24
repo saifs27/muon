@@ -1,6 +1,4 @@
 #include "config.hpp"
-
-#include <fstream>
 #include <json.hpp>
 
 std::expected<ModelConfig, FileError> get_config(const std::filesystem::path& path) {

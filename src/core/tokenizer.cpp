@@ -34,6 +34,7 @@ std::expected<Tokenizer, FileError> Tokenizer::load(
         return idx >= 0 && idx < config.vocab_size;
     };
 
+
     for (const auto token : vocab_list.value().items()) {
         if (!is_in_range(token.value()))
             return std::unexpected(FileError::UnexpectedData);
@@ -47,26 +48,34 @@ std::expected<Tokenizer, FileError> Tokenizer::load(
     }
 
     return Tokenizer(M{
-        .vocab = vocab,
+        .id_to_token = vocab,
         .vocab_size = config.vocab_size,
         .BOS = config.BOS,
         .EOS = config.EOS,
     });
 }
+std::vector<int> Tokenizer::encode(const std::string text) const {
+    
+
+}
 
 std::string Tokenizer::decode(const std::vector<int>& tokens) const {
-    std::string res;
-    const int string_size = std::accumulate(tokens.cbegin(), tokens.cend(), 0,
-                                            [&](int sum, const int idx) {
-                                                sum += m.vocab[idx].size();
-                                                return sum;
-                                            });
+    auto string_size = std::ranges::fold_left(tokens, 0, [&](int sum , const int idx) {
+        sum += m.id_to_token[idx].size();
+        return sum;
+    });
 
+    std::string res;
     res.reserve(string_size);
 
     for (const auto token : tokens) {
-        res.append(m.vocab[token]);
+        res.append(m.id_to_token[token]);
     }
 
     return res;
+}
+std::string Tokenizer::decode_one(int token) const {
+    assert(token < m.vocab_size);
+    return m.id_to_token[token];
+
 };

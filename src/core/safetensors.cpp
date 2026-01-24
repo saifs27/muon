@@ -43,7 +43,8 @@ std::expected<std::string, FileError> SafeTensors::read_header() const {
     return header;
 }
 
-std::expected<Metadata, FileError> SafeTensors::get_metadata() const {
+std::expected<std::vector<weights_map>, FileError>
+SafeTensors::get_weights_by_layer() const {
     // read header
     auto bytes = m.map.view_data();
 
@@ -66,8 +67,7 @@ std::expected<Metadata, FileError> SafeTensors::get_metadata() const {
         return get_layer_idx(a) < get_layer_idx(b);
     };
 
-
-    Metadata tensors;
+    std::flat_map<std::string, Tensor<>> tensors;
 
     for (auto& [key, value] : data.items()) {
         if (key == "__metadata__") {
@@ -84,23 +84,27 @@ std::expected<Metadata, FileError> SafeTensors::get_metadata() const {
 
         auto data_offsets = offset_data.value().get<std::array<uint64_t, 2>>();
         auto shape_vec = shape_data.value().get<std::vector<int>>();
-        auto precision = precision_data.value().get<std::string>();
+        auto precision =
+            str_to_tensor_dtype(precision_data.value().get<std::string>());
 
         assert(shape_vec.size() <= 4);
         std::array<int, 4> shape{};
         size_t copy_count = std::min(shape_vec.size(), shape.size());
         std::ranges::copy_n(shape_vec.begin(), copy_count, shape.begin());
 
-
-        tensors[key] = TensorMetadata {
-            .shape = shape,
-            .offset_begin = data_offsets[0],
-            .offset_end = data_offsets[1],
-            .precision =  str_to_tensor_dtype(precision),
-        };
+        auto start = 8 + header_size();
+        auto bytes =
+            view_range(start + data_offsets[0], start + data_offsets[1]);
+        tensors[key] = Tensor<>(bytes, shape);
     }
 
-    return tensors;
+    auto grouped_weights =
+        tensors | std::views::chunk_by([&](const auto& a, const auto& b) {
+            return get_layer_idx(a.first) == get_layer_idx(b.first);
+        }) |
+        std::ranges::to<std::vector<std::flat_map<std::string, Tensor<>>>>();
+
+    return grouped_weights;
 }
 
 

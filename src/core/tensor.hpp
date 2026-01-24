@@ -1,18 +1,11 @@
 #pragma once
 #include <array>
 #include <cstdint>
-#include <expected>
-#include <numeric>
 #include <string>
-#include <vector>
 #include <string_view>
 #include <span>
-#include "types.hpp"
-#include <memory>
 #include <flat_map>
 #include <stdfloat>
-#include <charconv>
-#include <map>
 
 enum class DType : uint8_t {
     fp32,
@@ -48,6 +41,7 @@ enum class TensorError : uint8_t {
 };
 
 
+// holds a view to tensor data to avoid repeated allocations.
 template <typename T = std::bfloat16_t>
 struct Tensor {
     std::span<T> data {};
@@ -67,6 +61,7 @@ struct Tensor {
         data(data), shape(shape) {}
 
 
+
     std::span<T> view() const {
         return data;
     }
@@ -77,36 +72,31 @@ struct Tensor {
 
 };
 
-struct TensorMetadata {
-    std::array<int, 4> shape {0, 0, 0, 0};
-    size_t offset_begin = 0;
-    size_t offset_end = 0;
-    DType precision = DType::bf16;
+struct TensorArena {
+    explicit TensorArena(size_t bytes) {
+        memory.resize(bytes);
+    }
+
+    template <typename T>
+    Tensor<T> allocate(std::array<int, 4> tensor_shape) {
+        size_t n_elements = tensor_shape[0] * tensor_shape[1] * tensor_shape[2] * tensor_shape[3];
+        size_t bytes = n_elements * sizeof(T);
+        size_t alignment = 64;
+        size_t padding = (alignment - (offset % alignment)) % alignment;
+        
+        if (offset + padding + bytes > memory.size()) {
+            return Tensor<T>();
+        }
+
+        std::span<std::byte> bytes_span(memory.data() + offset, bytes);
+        offset += padding;
+
+        return Tensor<T>(bytes_span, tensor_shape);
+    }
+
+    void reset() { offset = 0; }
+
+private:
+    std::vector<std::byte> memory;
+    size_t offset = 0;
 };
-
-inline int get_layer_idx(std::string_view id) {
-    auto digits = id 
-        | std::views::split('.')
-        | std::views::filter([](auto&& part){
-            return std::ranges::all_of(part, [](unsigned char c) {
-                return std::isdigit(c);
-            });
-        })
-        | std::ranges::to<std::vector<std::string>>();
-
-        if (digits.size() != 1) {return -1;}
-        return std::stoi(digits[0]);
-    };
-
-using Metadata = std::flat_map<std::string, TensorMetadata>;
-
-
-
-inline std::vector<Metadata> group_metadata_by_layer(const Metadata& meta, int n_layers) {
-    auto grouped_meta = meta 
-        | std::views::chunk_by([&](const auto& a, const auto& b) { return get_layer_idx(a.first) == get_layer_idx(b.first); })
-        | std::ranges::to<std::vector<Metadata>>();
-
-
-    return grouped_meta; 
-}

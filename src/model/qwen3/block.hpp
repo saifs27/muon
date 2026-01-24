@@ -1,8 +1,9 @@
 #pragma once
-#include <span>
-#include "core/tensor.hpp"
 #include <optional>
 #include <stdfloat>
+
+#include "core/tensor.hpp"
+#include "inference.hpp"
 
 template <typename T = std::bfloat16_t>
 struct Block {
@@ -26,7 +27,8 @@ struct Block {
     Tensor<T> v_proj;
     
     Block() = default;
-    static std::optional<Block<T>> create(std::flat_map<std::string, Tensor<T>> m, int idx) {
+    static std::optional<Block<T>> create(
+        std::flat_map<std::string, Tensor<T>> m, const int idx) {
         std::string id = std::to_string(idx);
         
         Tensor<T> _input_layernorm     = m["model.layers." + id + ".input_layernorm.weight"];
@@ -57,9 +59,27 @@ struct Block {
             _o_proj,
             _q_norm,
             _q_proj,
-            _v_proj
-        );
+            _v_proj);
     }
+    /*
+        void block(InferenceState& s) {
+            s.x_resid = rmsnorm(s.x, input_layernorm_weight);
+            s.x_resid = gqa(
+                s.x_resid,
+                q_proj, k_proj, v_proj,
+                q_norm, k_norm,
+                o_proj,
+                kv_cache
+            );
+            s.x += s.x_resid;
+
+            s.x_resid = rms_norm(s.x, post_attn_layernorm);
+
+            s.x_resid = swiglu(s.x_resid, gate_proj, up_proj, down_proj);
+            s.x += s.x_resid;
+
+        }
+            */
 
 
 

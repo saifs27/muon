@@ -1,7 +1,7 @@
 #include "utils.hpp"
 #include <fstream>
 
-std::string file_err_to_string(FileError err) {
+std::string file_err_to_string(const FileError err) {
     switch(err) {
         case FileError::FileNotFound : return "File not found";
         case FileError::ReadFailed : return "Failed to read file";
@@ -15,6 +15,8 @@ std::string file_err_to_string(FileError err) {
         case FileError::JsonUnexpectedData : return "Unexpected data in json file";
         case FileError::JsonAccessFailed : return "Failed to access element in json file";
     };
+
+    return "Unknown error";
 }
 
 namespace json {
