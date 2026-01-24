@@ -1,11 +1,10 @@
-#include <filesystem>
 #include <iostream>
-
+#include <filesystem>
+#include "core/utils.hpp"
 #include "core/config.hpp"
+#include "model/qwen3/model.hpp"
 #include "core/safetensors.hpp"
 #include "core/tokenizer.hpp"
-#include "core/utils.hpp"
-#include "model/qwen3/model.hpp"
 
 int main(const int argc, char* argv[]) {
     if (argc != 2) {
