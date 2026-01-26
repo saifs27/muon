@@ -62,11 +62,6 @@ std::expected<std::vector<weights_map>, FileError> SafeTensors::get_weights_by_l
         return std::unexpected(FileError::JsonParseFailed);
     }
 
-    auto cmp = [&](auto& a, auto& b) {
-        return get_layer_idx(a) < get_layer_idx(b);
-    };
-
-
     weights_map tensors;
 
     for (auto& [key, value] : data.items()) {

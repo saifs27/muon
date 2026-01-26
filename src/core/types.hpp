@@ -1,9 +1,9 @@
 #pragma once
 #include <bit>
 #include <cstdint>
-#include <stdfloat>
 
 #ifdef __STDCPP_BFLOAT16_T__
+    #include <stdfloat>
     using bf16 = std::bfloat16_t;
 #elif defined(__BF16__)
     using bf16 = __bf16;

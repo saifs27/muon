@@ -35,7 +35,7 @@ std::expected<Tokenizer, FileError> Tokenizer::load(
     };
 
 
-    for (const auto token : vocab_list.value().items()) {
+    for (const auto& token : vocab_list.value().items()) {
         if (!is_in_range(token.value()))
             return std::unexpected(FileError::UnexpectedData);
         vocab[token.value()] = token.key();

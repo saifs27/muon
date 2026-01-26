@@ -7,8 +7,8 @@ add_library(muon_core
         utils.cpp)
 
 target_compile_features(muon_core PRIVATE cxx_std_23)
-target_enable_all_warnings(muon_core)
-target_enable_asan(muon_core)
+target_enable_all(muon_core)
+
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_link_libraries(muon_core PRIVATE stdc++exp)

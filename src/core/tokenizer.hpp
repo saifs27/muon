@@ -12,7 +12,7 @@ class Tokenizer {
    private:
     struct M {
         std::vector<std::string> id_to_token{};
-        std::unordered_map<std::string, int16_t> token_to_id;
+        //std::unordered_map<std::string, int16_t> token_to_id; TODO: Implement token_to_id in load function
         int vocab_size;
         int BOS = -1;
         int EOS = -1;

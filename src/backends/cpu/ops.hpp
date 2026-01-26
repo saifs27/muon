@@ -9,9 +9,8 @@
 
 // activations
 
-constexpr void silu(const Tensor<> x, Tensor<> output) {
+constexpr void silu(const Tensor<> x, Tensor<> output);
 
-}
 
 // ----------------------------------------------------
 

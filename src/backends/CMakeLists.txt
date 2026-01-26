@@ -1,6 +1,5 @@
 add_library(muon_backend INTERFACE)
 
-
 if (MUON_BACKEND STREQUAL "CPU")
     add_subdirectory(cpu)
     target_link_libraries(muon_backend INTERFACE muon_backend_cpu)

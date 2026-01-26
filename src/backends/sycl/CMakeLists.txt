@@ -9,6 +9,7 @@ endif ()
 target_link_libraries(muon_backend_sycl PUBLIC muon_core)
 
 target_compile_definitions(muon_backend_sycl PUBLIC MUON_BACKEND_SYCL=1)
+target_enable_all(muon_backend_sycl)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|IntelLLVM")
     target_compile_options(muon_backend_sycl PRIVATE -fsycl)
