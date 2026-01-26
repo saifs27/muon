@@ -1,8 +1,15 @@
 #pragma once
 #include <bit>
 #include <cstdint>
+#include <stdfloat>
 
-using bf16 = uint16_t;
+#ifdef __STDCPP_BFLOAT16_T__
+    using bf16 = std::bfloat16_t;
+#elif defined(__BF16__)
+    using bf16 = __bf16;
+#else
+    using bf16 = uint16_t;
+#endif
 
 struct bfloat16 {
     std::uint16_t bits;

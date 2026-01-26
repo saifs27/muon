@@ -54,13 +54,10 @@ std::expected<Tokenizer, FileError> Tokenizer::load(
         .EOS = config.EOS,
     });
 }
-std::vector<int> Tokenizer::encode(const std::string text) const {
-    
-
-}
+//std::vector<int> Tokenizer::encode(const std::string text) const{}
 
 std::string Tokenizer::decode(const std::vector<int>& tokens) const {
-    auto string_size = std::ranges::fold_left(tokens, 0, [&](int sum , const int idx) {
+    auto string_size = std::ranges::fold_left(tokens, 0, [&](size_t sum , const int idx) {
         sum += m.id_to_token[idx].size();
         return sum;
     });

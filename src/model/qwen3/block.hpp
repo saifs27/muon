@@ -4,7 +4,7 @@
 #include <optional>
 #include <stdfloat>
 
-template <typename T = std::bfloat16_t>
+template <typename T = bf16>
 struct Block {
     Tensor<T> input_layernorm;
     Tensor<T> post_attn_layernorm;
@@ -26,7 +26,7 @@ struct Block {
     Tensor<T> v_proj;
     
     Block() = default;
-    static std::optional<Block<T>> create(std::flat_map<std::string, Tensor<T>> m, int idx) {
+    static std::optional<Block<T>> create(weights_map m, int idx) {
         std::string id = std::to_string(idx);
         
         Tensor<T> _input_layernorm     = m["model.layers." + id + ".input_layernorm.weight"];

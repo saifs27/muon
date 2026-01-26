@@ -67,7 +67,7 @@ std::expected<std::vector<weights_map>, FileError> SafeTensors::get_weights_by_l
     };
 
 
-    std::flat_map<std::string, Tensor<>> tensors;
+    weights_map tensors;
 
     for (auto& [key, value] : data.items()) {
         if (key == "__metadata__") {
@@ -84,7 +84,7 @@ std::expected<std::vector<weights_map>, FileError> SafeTensors::get_weights_by_l
 
         auto data_offsets = offset_data.value().get<std::array<uint64_t, 2>>();
         auto shape_vec = shape_data.value().get<std::vector<int>>();
-        auto precision = str_to_tensor_dtype(precision_data.value().get<std::string>());
+        //auto precision = str_to_tensor_dtype(precision_data.value().get<std::string>());
         
         assert(shape_vec.size() <= 4);
         std::array<int, 4> shape{};
@@ -92,13 +92,13 @@ std::expected<std::vector<weights_map>, FileError> SafeTensors::get_weights_by_l
         std::ranges::copy_n(shape_vec.begin(), copy_count, shape.begin());
 
         auto start = 8 + header_size();
-        auto bytes = view_range(start + data_offsets[0], start + data_offsets[1]);
-        tensors[key] = Tensor<>(bytes, shape);
+        auto weight_bytes = view_range(start + data_offsets[0], start + data_offsets[1]);
+        tensors[key] = Tensor<>(weight_bytes, shape);
     }
 
     auto grouped_weights = tensors
         | std::views::chunk_by([&](const auto& a, const auto& b) { return get_layer_idx(a.first) == get_layer_idx(b.first); })
-        | std::ranges::to<std::vector<std::flat_map<std::string, Tensor<>>>>();
+        | std::ranges::to<std::vector<weights_map>>();
 
     return grouped_weights;
 }

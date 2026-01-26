@@ -34,7 +34,6 @@
       "name": "debug",
       "displayName": "Debug",
       "inherits": "base",
-
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }

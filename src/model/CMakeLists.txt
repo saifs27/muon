@@ -6,6 +6,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_link_libraries(model PRIVATE stdc++exp)
 endif ()
 
+target_enable_all_warnings(model)
+target_enable_asan(model)
+
 target_link_libraries(model PUBLIC muon_core muon_backend)
 
 target_include_directories(model PUBLIC ${PROJECT_SOURCE_DIR}/src)

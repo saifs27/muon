@@ -1,6 +1,6 @@
 #include "ops.hpp"
 /*
-void softmax(Tensor<std::bfloat16_t> x) {
+void softmax(Tensor<> x) {
 
     float max_value = x[0];
     auto size = x.size();

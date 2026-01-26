@@ -24,7 +24,10 @@ std::expected<Model,ModelError> Model::load(const SafeTensors& sf) {
     bool set_norm = false;
 
     for (auto&& weights_map : layers) {
-        int idx = get_layer_idx(weights_map.keys().at(0));
+        auto keys = weights_map 
+            | std::views::keys;
+
+        int idx = get_layer_idx(keys.front());
 
         if (weights_map.size() == 2) {
             lm_head = weights_map["lm_head.weight"];

@@ -17,5 +17,5 @@ float Sampler::sample(const Tensor<float> logits, float temperature) {
 
 
 
-    return 1.0;
+    return temperature;
 }

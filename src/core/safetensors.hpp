@@ -2,10 +2,18 @@
 
 #include <expected>
 #include <filesystem>
+#include <map>
 
 #include "memory_map.hpp"
 #include "tensor.hpp"
 #include "utils.hpp"
+
+/*
+Temporarily using map due to need for ordering and spotty compiler support for flat_map
+TODO: use more cache-friendly option like flat_map for better performance.
+*/
+using weights_map = std::map<std::string, Tensor<>>; 
+// 
 
 class SafeTensors {
     struct M {
@@ -23,7 +31,7 @@ class SafeTensors {
     [[nodiscard]] size_t header_size() const noexcept { return m.header_size; }
     [[nodiscard]] std::expected<std::string, FileError> read_header() const;
 
-    // returns weights grouped together by layer (note: sorting is lexicographic by default in flat_map (i.e sorted like: layer 1, 10, 11)).
+    // returns weights grouped together by layer (note: sorting is lexicographic by default (i.e sorted like: layer 1, 10, 11)).
     [[nodiscard]] std::expected<std::vector<weights_map>, FileError> get_weights_by_layer() const; 
     std::byte * data() const {return m.map.data();}
 
@@ -47,8 +55,7 @@ inline int get_layer_idx(std::string_view id) {
         });
 
         if (std::ranges::distance(digits) != 1) {return -1;}
-        const auto digit_str = std::ranges::to<std::string>(digits);
-        return std::stoi(digit_str);
+        const auto digit_str = std::ranges::to<std::vector<std::string>>(digits);
+        return std::stoi(digit_str[0]);
     };
 
-using weights_map = std::flat_map<std::string, Tensor<>>;

@@ -4,8 +4,9 @@
 #include <string>
 #include <string_view>
 #include <span>
-#include <flat_map>
 #include <stdfloat>
+#include <vector>
+#include "types.hpp"
 
 enum class DType : uint8_t {
     fp32,
@@ -42,7 +43,7 @@ enum class TensorError : uint8_t {
 
 
 // holds a view to tensor data to avoid repeated allocations.
-template <typename T = std::bfloat16_t>
+template <typename T = bf16>
 struct Tensor {
     std::span<T> data {};
     std::array<int, 4> shape {};
