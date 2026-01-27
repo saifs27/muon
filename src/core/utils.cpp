@@ -1,4 +1,5 @@
 #include "utils.hpp"
+#include "memory_map.hpp"
 #include <fstream>
 
 std::string file_err_to_string(const FileError err) {
@@ -22,8 +23,19 @@ std::string file_err_to_string(const FileError err) {
 namespace json {
 std::expected<nlohmann::basic_json<>, FileError> to_json(
     const std::filesystem::path& path) {
-    std::ifstream file(path);
-    auto json_data = nlohmann::json::parse(file, nullptr, false);
+    auto map = MemoryMap::map(path);
+
+    if (!map.has_value()) {
+        return std::unexpected(map.error());
+    }
+
+    const auto& mmap = map.value();
+    auto view = mmap.view_data();
+
+    const char* begin = std::bit_cast<const char*>(view.data());
+    const char* end = begin + view.size();
+
+    auto json_data = nlohmann::json::parse(begin, end, nullptr, false);
 
     if (json_data.is_discarded()) {
         return std::unexpected(FileError::JsonParseFailed);
@@ -31,8 +43,8 @@ std::expected<nlohmann::basic_json<>, FileError> to_json(
     return json_data;
 }
 
-std::expected<nlohmann::json, FileError> access(const nlohmann::json& json,
-                                                const std::string& id) {
+std::expected<std::reference_wrapper<const nlohmann::json>, FileError> access(
+    const nlohmann::json& json, const std::string_view id) {
     auto it = json.find(id);
     if (it == json.end()) {
         return std::unexpected(FileError::JsonUnexpectedData);
@@ -40,11 +52,21 @@ std::expected<nlohmann::json, FileError> access(const nlohmann::json& json,
 
     return *it;
 }
-std::expected<nlohmann::json, FileError> access_nested(
-    const nlohmann::json& json, const std::string& id1,
-    const std::string& id2) {
-    return access(json, id1).and_then(
-        [&](const auto& j) { return access(j, id2); });
+std::expected<std::reference_wrapper<const nlohmann::json>, FileError>
+access_nested(const nlohmann::json& json, const std::string_view id1,
+              const std::string_view id2) {
+    auto it1 = json.find(id1);
+    if (it1 == json.end()) {
+        return std::unexpected(FileError::JsonUnexpectedData);
+    }
+    const auto& nested_json = *it1;
+    auto it2 = nested_json.find(id2);
+
+    if (it2 == nested_json.end()) {
+        return std::unexpected(FileError::JsonUnexpectedData);
+    }
+
+    return *it2;
 }
 
 }  // namespace json

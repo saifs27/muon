@@ -21,7 +21,7 @@ endfunction()
 
 
 function(target_enable_asan TARGET_NAME)
-    if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    if (CMAKE_BUILD_TYPE STREQUAL "Release" OR MINGW)
         return()
     endif()
 
@@ -46,7 +46,7 @@ function(target_enable_asan TARGET_NAME)
 endfunction()
 
 function(target_enable_ubsan TARGET_NAME)
-    if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    if (CMAKE_BUILD_TYPE STREQUAL "Release" OR MSVC OR MINGW)
         return()
     endif()
     check_cxx_compiler_flag(-fsanitize=undefined SUPPORTS_UBSAN)

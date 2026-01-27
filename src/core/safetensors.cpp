@@ -77,8 +77,8 @@ std::expected<std::vector<weights_map>, FileError> SafeTensors::get_weights_by_l
             return std::unexpected(FileError::JsonAccessFailed);
         }
 
-        auto data_offsets = offset_data.value().get<std::array<uint64_t, 2>>();
-        auto shape_vec = shape_data.value().get<std::vector<int>>();
+        auto data_offsets = offset_data.value().get().get<std::array<uint64_t, 2>>();
+        auto shape_vec = shape_data.value().get().get<std::vector<int>>();
         //auto precision = str_to_tensor_dtype(precision_data.value().get<std::string>());
         
         assert(shape_vec.size() <= 4);

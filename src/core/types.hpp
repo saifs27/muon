@@ -13,6 +13,7 @@
 
 struct bfloat16 {
     std::uint16_t bits;
+
 };
 
 inline float bf16_to_fp32(const bfloat16 bf16_bits) {

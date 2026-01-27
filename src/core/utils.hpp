@@ -26,9 +26,9 @@ namespace json {
 std::expected<nlohmann::basic_json<>, FileError> to_json(
     const std::filesystem::path& path);
 
-std::expected<nlohmann::json, FileError> access(const nlohmann::json& json,
-                                                const std::string& id);
+std::expected<std::reference_wrapper<const nlohmann::json>, FileError> access(const nlohmann::json& json,
+                                                const std::string_view id);
 
-std::expected<nlohmann::json, FileError> access_nested(
-    const nlohmann::json& json, const std::string& id1, const std::string& id2);
+std::expected<std::reference_wrapper<const nlohmann::json>, FileError> access_nested(
+    const nlohmann::json& json, const std::string_view id1, const std::string_view id2);
 }  // namespace json

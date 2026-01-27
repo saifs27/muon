@@ -6,6 +6,7 @@
 #include <ranges>
 
 #include "utils.hpp"
+#include "memory_map.hpp"
 
 std::expected<Tokenizer, FileError> Tokenizer::load(
     const ModelConfig& config, const std::filesystem::path& path) {
@@ -14,10 +15,30 @@ std::expected<Tokenizer, FileError> Tokenizer::load(
         return std::unexpected(FileError::FileNotFound);
     }
 
+
+    auto mmap_res = MemoryMap::map(path);
+    if (!mmap_res.has_value()) {
+        return std::unexpected(mmap_res.error());
+    }
+
+    const auto& mmap = mmap_res.value();
+    auto view = mmap.view_data();
+
+    auto begin = bit_cast<const char*>(view.data());
+    auto end = begin + view.size();
+
+
     std::vector<std::string> vocab;
     vocab.resize(config.vocab_size);
 
+    TokenizerSAX handler(vocab, config.vocab_size);
+    bool res = nlohmann::json::sax_parse(begin, end, &handler);
+    if (!res) {
+        return std::unexpected(FileError::JsonParseFailed);
+    }
+    /*
     auto json = json::to_json(path);
+
 
     if (!json.has_value()) {
         return std::unexpected(json.error());
@@ -35,19 +56,20 @@ std::expected<Tokenizer, FileError> Tokenizer::load(
     };
 
 
-    for (const auto& token : vocab_list.value().items()) {
+    for (const auto& token : vocab_list.value().get().items()) {
         if (!is_in_range(token.value()))
             return std::unexpected(FileError::UnexpectedData);
         vocab[token.value()] = token.key();
     }
 
-    for (const auto& item : added_tokens.value()) {
+    for (const auto& item : added_tokens.value().get()) {
         if (!is_in_range(item.at("id")))
             return std::unexpected(FileError::UnexpectedData);
         vocab[item.at("id")] = item.at("content");
     }
+        */
 
-    return Tokenizer(M{
+    return Tokenizer(M {
         .id_to_token = vocab,
         .vocab_size = config.vocab_size,
         .BOS = config.BOS,

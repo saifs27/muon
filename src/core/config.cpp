@@ -13,16 +13,34 @@ std::expected<ModelConfig, FileError> get_config(const std::filesystem::path& pa
     }
 
     auto get_int = [&json_data](const std::string& id) {
-        return json::access(json_data.value(), id).value_or(-1).get<int>();
+        auto data = json::access(json_data.value(), id);
+        if (!data.has_value()) {
+            return -1;
+        }
+        return data
+            .value()
+            .get()
+            .get<int>();
     };
 
     auto get_double = [&json_data](const std::string& id) {
-        return json::access(json_data.value(), id).value_or(-1).get<double>();
+        auto data = json::access(json_data.value(), id);
+        if (!data.has_value()) {
+            return -1.0;
+        }
+        return data
+            .value()
+            .get()
+            .get<double>();
     };
 
     auto get_act = [&json_data](const std::string& id) {
-        auto str =
-            json::access(json_data.value(), id).value_or("").get<std::string>();
+        auto data = json::access(json_data.value(), id);
+
+        if (!data.has_value()) {
+            return ActivationType::NotImplemented;
+        }
+        auto str = data.value().get().get<std::string>();
         if (str == "silu") {
             return ActivationType::SILU;
         }
